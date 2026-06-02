@@ -1,0 +1,425 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f7f8;
+  --surface: #ffffff;
+  --surface-strong: #eef2f3;
+  --ink: #172026;
+  --muted: #65727b;
+  --line: #d8e0e4;
+  --primary: #0f766e;
+  --primary-dark: #0b5f59;
+  --accent: #b45309;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  --shadow: 0 18px 45px rgba(23, 32, 38, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, "Yu Gothic UI", "Hiragino Sans", Meiryo, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 24px;
+  background: #102428;
+  color: #f8fbfb;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background: #1f3d3f;
+  color: #d4f7ef;
+  font-weight: 800;
+}
+
+.brand-name,
+.brand-subtitle,
+.eyebrow,
+.inbox-head p,
+.gmail-panel p,
+.sync-note {
+  margin: 0;
+}
+
+.brand-name {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.brand-subtitle,
+.gmail-panel p,
+.sync-note {
+  color: #b8c8ca;
+  font-size: 13px;
+}
+
+.nav-list {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-item {
+  width: 100%;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #d9e6e7;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-item.active,
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.gmail-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: auto;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.gmail-panel h2,
+.filters h2,
+.inbox-head h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.main {
+  display: grid;
+  gap: 22px;
+  align-content: start;
+  padding: 30px;
+}
+
+.topbar,
+.inbox-head,
+.top-actions,
+.job-main,
+.job-meta,
+.job-footer,
+.score-row {
+  display: flex;
+  align-items: center;
+}
+
+.topbar {
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 4px 0 0;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.top-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.primary-button,
+.ghost-button {
+  min-height: 40px;
+  border-radius: 6px;
+  padding: 0 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primary-button {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: var(--primary-dark);
+}
+
+.ghost-button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric,
+.filters,
+.inbox {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.metric {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.metric strong {
+  font-size: 30px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.filters {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #344249;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfcfc;
+  color: var(--ink);
+  padding: 0 10px;
+}
+
+.checkbox-label {
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-label input {
+  min-height: auto;
+}
+
+.inbox {
+  overflow: hidden;
+}
+
+.inbox-head {
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.inbox-head p {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.search-box {
+  width: min(280px, 100%);
+}
+
+.job-list {
+  display: grid;
+}
+
+.job-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.job-card:last-child {
+  border-bottom: 0;
+}
+
+.job-main {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.job-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.company {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.score {
+  display: grid;
+  min-width: 72px;
+  height: 72px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-strong);
+  color: var(--primary);
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.job-meta,
+.job-footer {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  background: #edf4f2;
+  color: #23514d;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pill.warning {
+  background: #fff3df;
+  color: var(--warn);
+}
+
+.pill.bad {
+  background: #fee2e2;
+  color: var(--bad);
+}
+
+.reason {
+  margin: 0;
+  color: #435158;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.status-select {
+  width: auto;
+  min-width: 132px;
+}
+
+.empty {
+  padding: 42px 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .app-shell,
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    min-height: auto;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .main,
+  .sidebar {
+    padding: 18px;
+  }
+
+  .topbar,
+  .inbox-head,
+  .job-main {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .top-actions,
+  .search-box {
+    width: 100%;
+  }
+
+  .top-actions button {
+    flex: 1;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .score {
+    align-self: flex-start;
+  }
+}

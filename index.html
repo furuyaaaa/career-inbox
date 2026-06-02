@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Career Inbox</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="ナビゲーション">
+        <div class="brand">
+          <span class="brand-mark">CI</span>
+          <div>
+            <p class="brand-name">Career Inbox</p>
+            <p class="brand-subtitle">求人メール仕分け</p>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item active" type="button">受信求人</button>
+          <button class="nav-item" type="button">希望条件</button>
+          <button class="nav-item" type="button">応募管理</button>
+          <button class="nav-item" type="button">分析</button>
+        </nav>
+
+        <section class="gmail-panel" aria-labelledby="gmail-title">
+          <h2 id="gmail-title">Gmail 連携</h2>
+          <p>求人・スカウト・エージェントのメールを取り込み、会社名や年収などを抽出します。</p>
+          <button class="primary-button" id="syncButton" type="button">サンプル同期</button>
+          <p class="sync-note" id="syncNote">最終同期: 未実行</p>
+        </section>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Matching dashboard</p>
+            <h1>見逃したくない求人を、先に見る。</h1>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-button" id="resetButton" type="button">初期化</button>
+            <button class="primary-button" id="scoreButton" type="button">再スコアリング</button>
+          </div>
+        </header>
+
+        <section class="metrics" aria-label="求人サマリー">
+          <article class="metric">
+            <span class="metric-label">取り込み求人</span>
+            <strong id="totalJobs">0</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">高マッチ</span>
+            <strong id="hotJobs">0</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">平均スコア</span>
+            <strong id="avgScore">0</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">応募候補</span>
+            <strong id="applyJobs">0</strong>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <aside class="filters" aria-labelledby="criteria-title">
+            <h2 id="criteria-title">希望条件</h2>
+            <label>
+              希望年収下限
+              <input id="salaryInput" type="number" min="300" max="2000" step="50" value="650">
+            </label>
+            <label>
+              希望勤務地
+              <select id="locationInput">
+                <option value="東京">東京</option>
+                <option value="大阪">大阪</option>
+                <option value="福岡">福岡</option>
+                <option value="全国">全国</option>
+              </select>
+            </label>
+            <label class="checkbox-label">
+              <input id="remoteInput" type="checkbox" checked>
+              リモート可を優先
+            </label>
+            <label>
+              使いたい技術
+              <input id="techInput" type="text" value="Laravel, Python, React, AWS">
+            </label>
+            <label>
+              除外キーワード
+              <input id="excludeInput" type="text" value="SES, 常駐のみ">
+            </label>
+          </aside>
+
+          <section class="inbox" aria-labelledby="inbox-title">
+            <div class="inbox-head">
+              <div>
+                <h2 id="inbox-title">受信求人</h2>
+                <p>Gmail から抽出された求人を、希望条件との一致度で並び替えます。</p>
+              </div>
+              <div class="search-box">
+                <input id="searchInput" type="search" placeholder="会社名・技術で検索">
+              </div>
+            </div>
+            <div class="job-list" id="jobList"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
