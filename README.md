@@ -21,6 +21,43 @@ Career Inbox は、求人メールや会社情報を一元管理し、条件・�
 
 実際の Gmail 連携では、Gmail API の OAuth 認証を使い、求人メールらしいメッセージだけを取得して `job_posts` に保存する想定です。
 
+## Docker 開発環境
+
+Laravel + PostgreSQL を Docker Compose で起動できます。
+
+### 起動
+
+```bash
+docker compose up -d --build
+```
+
+ブラウザで以下を開きます。
+
+```text
+http://localhost:8080
+```
+
+### 初期セットアップ
+
+初回起動後、DB マイグレーションを実行します。
+
+```bash
+docker compose exec app php artisan migrate
+```
+
+フロントエンドの Vite 開発サーバーも使う場合は、`frontend` profile を付けて起動します。
+
+```bash
+docker compose --profile frontend up -d --build
+```
+
+### サービス構成
+
+- `web`: Nginx
+- `app`: PHP-FPM / Laravel
+- `db`: PostgreSQL
+- `node`: Vite 開発サーバー
+
 ## 想定ユーザー
 
 - 転職活動中のエンジニア
