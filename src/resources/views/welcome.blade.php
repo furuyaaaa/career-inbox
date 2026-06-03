@@ -182,6 +182,21 @@
         color: #d4f7ef;
       }
 
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        width: fit-content;
+        border: 1px solid var(--primary);
+        border-radius: 6px;
+        background: var(--primary);
+        color: #ffffff;
+        font-weight: 700;
+        padding: 0 14px;
+        text-decoration: none;
+      }
+
       @media (max-width: 900px) {
         .shell,
         .grid {
@@ -251,6 +266,11 @@
           <strong>開発コマンド</strong>
           <code>docker compose up -d --build</code>
           <code>docker compose exec app php artisan migrate</code>
+        </section>
+
+        <section class="commands">
+          <strong>アプリ画面</strong>
+          <a class="button" href="{{ route('jobs.index') }}">受信求人を開く</a>
         </section>
       </main>
     </div>
