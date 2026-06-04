@@ -62,10 +62,19 @@ docker compose --profile frontend up -d --build
 
 Laravel アプリ側では、以下の画面を実装済みです。
 
+- `http://localhost:8080/login`: ログイン
+- `http://localhost:8080/register`: 新規登録
 - `http://localhost:8080/jobs`: 求人一覧
 - `http://localhost:8080/jobs/create`: 求人登録
 - `http://localhost:8080/preferences`: 希望条件の編集
 - `http://localhost:8080/gmail`: Gmail 連携・求人メール取り込み
+
+`php artisan db:seed` 実行後は、以下のデモユーザーでログインできます。
+
+```text
+email: test@example.com
+password: password
+```
 
 求人一覧では、会社名・求人タイトル・職種・業界・勤務地のキーワード検索、ステータス絞り込み、リモート条件絞り込みができます。
 
@@ -110,6 +119,7 @@ GOOGLE_REDIRECT_URI=http://localhost:8080/gmail/callback
 
 ### 求人管理
 
+- ログイン、新規登録、ログアウト
 - 求人情報の登録・編集・削除
 - 会社名、求人タイトル、勤務地、年収、雇用形態の管理
 - 職種、業界、スキル・経験、リモート可否、求人URL、メモの管理

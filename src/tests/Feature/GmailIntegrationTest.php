@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\GmailImport;
 use App\Models\GmailConnection;
 use App\Models\JobPost;
+use App\Models\User;
 use App\Services\GmailImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -13,6 +14,13 @@ use Tests\TestCase;
 class GmailIntegrationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create());
+    }
 
     public function test_gmail_page_loads(): void
     {

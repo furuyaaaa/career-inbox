@@ -3,12 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\JobPost;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class JobPostCrudTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create());
+    }
 
     public function test_job_posts_can_be_listed(): void
     {

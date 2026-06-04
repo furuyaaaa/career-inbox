@@ -118,6 +118,23 @@
         background: rgba(255, 255, 255, 0.06);
       }
 
+      .account-box {
+        display: grid;
+        gap: 10px;
+        margin-top: auto;
+      }
+
+      .account-box form {
+        margin: 0;
+      }
+
+      .sidebar .button {
+        width: 100%;
+        border-color: rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+      }
+
       .main {
         display: grid;
         align-content: start;
@@ -354,7 +371,7 @@
   <body>
     <div class="shell">
       <aside class="sidebar">
-        <a class="brand" href="{{ route('jobs.index') }}">
+        <a class="brand" href="{{ auth()->check() ? route('jobs.index') : route('login') }}">
           <span class="mark">CI</span>
           <span>
             <strong>Career Inbox</strong>
@@ -362,14 +379,32 @@
           </span>
         </a>
         <nav class="nav">
-          <a href="{{ route('jobs.index') }}" @class(['active' => request()->routeIs('jobs.*')])>受信求人</a>
-          <a href="{{ route('preferences.edit') }}" @class(['active' => request()->routeIs('preferences.*')])>希望条件</a>
-          <a href="{{ route('gmail.index') }}" @class(['active' => request()->routeIs('gmail.*')])>Gmail 連携</a>
-          <a href="{{ route('jobs.index', ['sort' => 'match']) }}">マッチング</a>
+          @auth
+            <a href="{{ route('jobs.index') }}" @class(['active' => request()->routeIs('jobs.*')])>受信求人</a>
+            <a href="{{ route('preferences.edit') }}" @class(['active' => request()->routeIs('preferences.*')])>希望条件</a>
+            <a href="{{ route('gmail.index') }}" @class(['active' => request()->routeIs('gmail.*')])>Gmail 連携</a>
+            <a href="{{ route('jobs.index', ['sort' => 'match']) }}">マッチング</a>
+          @else
+            <a href="{{ route('login') }}" @class(['active' => request()->routeIs('login')])>ログイン</a>
+            <a href="{{ route('register') }}" @class(['active' => request()->routeIs('register')])>新規登録</a>
+          @endauth
         </nav>
-        <div class="side-note">
-          <strong>Phase 1</strong>
-          <p>職種・業界・スキル・働き方で応募候補を整理します。</p>
+        <div class="account-box">
+          @auth
+            <div class="side-note">
+              <strong>{{ auth()->user()->name }}</strong>
+              <p>{{ auth()->user()->email }}</p>
+            </div>
+            <form method="post" action="{{ route('logout') }}">
+              @csrf
+              <button class="button secondary" type="submit">ログアウト</button>
+            </form>
+          @else
+            <div class="side-note">
+              <strong>Career Inbox</strong>
+              <p>ログインして求人メールと希望条件を管理します。</p>
+            </div>
+          @endauth
         </div>
       </aside>
 

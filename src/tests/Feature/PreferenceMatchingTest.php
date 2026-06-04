@@ -4,12 +4,20 @@ namespace Tests\Feature;
 
 use App\Models\JobPost;
 use App\Models\PreferenceProfile;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PreferenceMatchingTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create());
+    }
 
     public function test_preferences_can_be_updated(): void
     {
