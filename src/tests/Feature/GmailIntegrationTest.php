@@ -54,6 +54,15 @@ class GmailIntegrationTest extends TestCase
             ->assertSessionHas('status', 'Google OAuth の認証情報が未設定です。');
     }
 
+    public function test_callback_without_oauth_state_returns_to_gmail_page(): void
+    {
+        $response = $this->get('/gmail/callback');
+
+        $response
+            ->assertRedirect('/gmail')
+            ->assertSessionHas('status', 'Gmail 連携は、Gmail 連携画面の「Gmail を接続」から開始してください。');
+    }
+
     public function test_import_recent_extracts_job_fields_from_gmail_body(): void
     {
         $connection = GmailConnection::create([

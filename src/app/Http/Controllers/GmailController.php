@@ -45,12 +45,17 @@ class GmailController extends Controller
     {
         $sessionState = (string) $request->session()->pull('gmail_oauth_state');
 
-        abort_unless(
-            $sessionState !== '' && hash_equals($sessionState, (string) $request->query('state')),
-            403,
-        );
+        if ($sessionState === '' || ! hash_equals($sessionState, (string) $request->query('state'))) {
+            return redirect()
+                ->route('gmail.index')
+                ->with('status', 'Gmail 連携は、Gmail 連携画面の「Gmail を接続」から開始してください。');
+        }
 
-        $request->validate(['code' => ['required', 'string']]);
+        if (! $request->filled('code')) {
+            return redirect()
+                ->route('gmail.index')
+                ->with('status', 'Google 認証コードを取得できませんでした。もう一度「Gmail を接続」から試してください。');
+        }
 
         try {
             $connection = $this->gmail->exchangeCode($request->string('code')->toString());
