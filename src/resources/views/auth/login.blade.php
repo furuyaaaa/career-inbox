@@ -40,4 +40,15 @@
       </div>
     </div>
   </form>
+
+  <form class="panel" method="post" action="{{ route('login.demo') }}">
+    @csrf
+    <div class="page-head">
+      <div>
+        <h2>デモログイン</h2>
+        <p class="muted">デモユーザーを自動で用意して、求人一覧へ進みます。</p>
+      </div>
+      <button class="button" type="submit">デモユーザーで入る</button>
+    </div>
+  </form>
 @endsection

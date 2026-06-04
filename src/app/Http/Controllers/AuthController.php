@@ -34,6 +34,26 @@ class AuthController extends Controller
         return redirect()->intended(route('jobs.index'));
     }
 
+    public function demoLogin(Request $request): RedirectResponse
+    {
+        abort_if(app()->isProduction(), 404);
+
+        $user = User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+            ],
+        );
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()
+            ->route('jobs.index')
+            ->with('status', 'デモユーザーでログインしました。');
+    }
+
     public function register(): View
     {
         return view('auth.register');
