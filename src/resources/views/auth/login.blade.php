@@ -20,6 +20,9 @@
   <form class="panel" method="post" action="{{ route('login.authenticate') }}">
     @csrf
     <div class="form-grid">
+      <div class="flash span-2">
+        デモ確認は <strong>test@example.com</strong> / <strong>password</strong> でログインできます。入力せずに進む場合は「デモユーザーで入る」を押してください。
+      </div>
       <label class="span-2">
         メールアドレス
         <input name="email" type="email" value="{{ old('email') }}" autocomplete="email" required autofocus>
@@ -36,19 +39,13 @@
       </label>
       <div class="actions" style="align-self: end;">
         <button class="button" type="submit">ログイン</button>
+        <button class="button secondary" form="demo-login-form" type="submit">デモユーザーで入る</button>
         <a class="button secondary" href="{{ route('register') }}">新規登録</a>
       </div>
     </div>
   </form>
 
-  <form class="panel" method="post" action="{{ route('login.demo') }}">
+  <form id="demo-login-form" method="post" action="{{ route('login.demo') }}">
     @csrf
-    <div class="page-head">
-      <div>
-        <h2>デモログイン</h2>
-        <p class="muted">デモユーザーを自動で用意して、求人一覧へ進みます。</p>
-      </div>
-      <button class="button" type="submit">デモユーザーで入る</button>
-    </div>
   </form>
 @endsection

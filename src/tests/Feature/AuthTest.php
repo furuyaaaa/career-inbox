@@ -18,7 +18,9 @@ class AuthTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('ログイン')
-            ->assertSee('新規登録');
+            ->assertSee('新規登録')
+            ->assertSee('test@example.com')
+            ->assertSee('デモユーザーで入る');
     }
 
     public function test_user_can_login(): void
