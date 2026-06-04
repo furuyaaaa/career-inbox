@@ -81,7 +81,7 @@ class GmailImportService
             }
 
             $payload = Http::withToken($token)
-                ->get("https://gmail.googleapis.com/gmail/v1/users/me/messages/{$messageId}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date")
+                ->get("https://gmail.googleapis.com/gmail/v1/users/me/messages/{$messageId}?format=full")
                 ->throw()
                 ->json();
 
@@ -226,16 +226,27 @@ class GmailImportService
         $sender = $this->header($payload, 'From');
         $snippet = $payload['snippet'] ?? '';
         $receivedAt = $this->dateFromMessage($payload);
+        $body = $this->messageBody($payload);
+        $fields = $this->extractJobFields($subject, $body);
 
         return JobPost::create([
-            'company_name' => $this->guessCompanyName($subject, $sender),
-            'title' => $subject,
+            'company_name' => $fields['company_name'] ?? $this->guessCompanyName($subject, $sender),
+            'title' => $fields['title'] ?? $subject,
+            'occupation' => $fields['occupation'] ?? null,
+            'industry' => $fields['industry'] ?? null,
             'source' => 'Gmail',
             'agent_name' => $sender,
+            'location' => $fields['location'] ?? null,
+            'salary_min' => $fields['salary_min'] ?? null,
+            'salary_max' => $fields['salary_max'] ?? null,
+            'employment_type' => $fields['employment_type'] ?? null,
+            'remote_type' => $fields['remote_type'] ?? null,
+            'technologies' => $fields['technologies'] ?? [],
             'status' => '未確認',
             'interest_level' => 3,
+            'url' => $fields['url'] ?? null,
             'received_at' => $receivedAt,
-            'memo' => $snippet,
+            'memo' => trim($snippet."\n\n".$body),
         ]);
     }
 
@@ -278,6 +289,197 @@ class GmailImportService
         }
 
         return $sender ? mb_substr($sender, 0, 80) : 'Gmail 取り込み';
+    }
+
+    private function messageBody(array $payload): string
+    {
+        $plain = $this->bodyPart($payload['payload'] ?? [], 'text/plain');
+        $html = $this->bodyPart($payload['payload'] ?? [], 'text/html');
+        $body = $plain ?: strip_tags((string) $html);
+
+        return trim(html_entity_decode($body, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    private function bodyPart(array $part, string $mimeType): ?string
+    {
+        if (($part['mimeType'] ?? null) === $mimeType && filled(Arr::get($part, 'body.data'))) {
+            return $this->decodeGmailBody((string) Arr::get($part, 'body.data'));
+        }
+
+        foreach ($part['parts'] ?? [] as $child) {
+            $body = $this->bodyPart($child, $mimeType);
+
+            if ($body !== null) {
+                return $body;
+            }
+        }
+
+        return null;
+    }
+
+    private function decodeGmailBody(string $data): string
+    {
+        $normalized = strtr($data, '-_', '+/');
+        $normalized .= str_repeat('=', (4 - strlen($normalized) % 4) % 4);
+
+        return (string) base64_decode($normalized);
+    }
+
+    /**
+     * @return array{
+     *     company_name?: string,
+     *     title?: string,
+     *     occupation?: string,
+     *     industry?: string,
+     *     location?: string,
+     *     salary_min?: int,
+     *     salary_max?: int,
+     *     employment_type?: string,
+     *     remote_type?: string,
+     *     technologies?: array<int, string>,
+     *     url?: string
+     * }
+     */
+    private function extractJobFields(string $subject, string $body): array
+    {
+        $text = trim($subject."\n".$body);
+        $fields = [];
+
+        $fields['company_name'] = $this->lineValue($text, ['会社名', '企業名', '社名']);
+        $fields['title'] = $this->lineValue($text, ['求人名', 'ポジション', '募集職種']);
+        $fields['location'] = $this->lineValue($text, ['勤務地', '勤務場所']);
+        $fields['employment_type'] = $this->detectFirst($text, ['正社員', '契約社員', '業務委託', '副業']);
+        $fields['remote_type'] = $this->detectRemoteType($text);
+        $fields['occupation'] = $this->detectOccupation($text);
+        $fields['industry'] = $this->detectIndustry($text);
+        $fields['technologies'] = $this->extractSkills($text);
+        $fields['url'] = $this->extractUrl($text);
+
+        if (preg_match('/(?:年収|想定年収|給与)[^\d]*(\d{3,4})\s*(?:万|万円)?\s*(?:-|~|〜|～|から|以上)?\s*(\d{3,4})?/u', $text, $matches)) {
+            $fields['salary_min'] = (int) $matches[1];
+            $fields['salary_max'] = isset($matches[2]) && $matches[2] !== '' ? (int) $matches[2] : null;
+        }
+
+        return array_filter($fields, fn ($value): bool => $value !== null && $value !== [] && $value !== '');
+    }
+
+    /**
+     * @param array<int, string> $labels
+     */
+    private function lineValue(string $text, array $labels): ?string
+    {
+        $labelPattern = implode('|', array_map(fn (string $label): string => preg_quote($label, '/'), $labels));
+
+        if (preg_match("/(?:{$labelPattern})\s*[:：]\s*(.+)/u", $text, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<int, string> $values
+     */
+    private function detectFirst(string $text, array $values): ?string
+    {
+        foreach ($values as $value) {
+            if (str_contains($text, $value)) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    private function detectRemoteType(string $text): ?string
+    {
+        if (str_contains($text, 'フルリモート') || str_contains($text, '完全在宅')) {
+            return 'フルリモート';
+        }
+
+        if (str_contains($text, 'ハイブリッド')) {
+            return 'ハイブリッド';
+        }
+
+        if (preg_match('/週\s*3.*リモート/u', $text)) {
+            return '週3リモート';
+        }
+
+        if (str_contains($text, '出社中心')) {
+            return '出社中心';
+        }
+
+        return null;
+    }
+
+    private function detectOccupation(string $text): ?string
+    {
+        $keywords = [
+            '営業' => ['営業', 'セールス', 'アカウント'],
+            'マーケティング' => ['マーケティング', '広告運用', 'SEO'],
+            'カスタマーサクセス' => ['カスタマーサクセス', 'CS', '導入支援'],
+            '管理部門' => ['経理', '人事', '総務', '法務', '採用'],
+            '企画' => ['事業企画', '営業企画', '商品企画'],
+            'エンジニア' => ['エンジニア', '開発', 'Laravel', 'PHP', 'React'],
+            'デザイン' => ['デザイナー', 'UI', 'UX'],
+        ];
+
+        foreach ($keywords as $occupation => $needles) {
+            if ($this->detectFirst($text, $needles)) {
+                return $occupation;
+            }
+        }
+
+        return null;
+    }
+
+    private function detectIndustry(string $text): ?string
+    {
+        $keywords = [
+            'IT' => ['IT', 'SaaS', 'クラウド', 'ソフトウェア'],
+            '人材' => ['人材', '採用', 'HR'],
+            '金融' => ['金融', 'FinTech', '保険', '証券'],
+            '教育' => ['教育', 'EdTech', '研修'],
+            '医療' => ['医療', 'ヘルスケア'],
+            '小売' => ['小売', 'EC', 'D2C'],
+            'メーカー' => ['メーカー', '製造'],
+        ];
+
+        foreach ($keywords as $industry => $needles) {
+            if ($this->detectFirst($text, $needles)) {
+                return $industry;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function extractSkills(string $text): array
+    {
+        $line = $this->lineValue($text, ['スキル', '経験', '必須条件', '歓迎条件']);
+
+        if (! $line) {
+            return [];
+        }
+
+        return collect(preg_split('/[,、\/・]/u', $line) ?: [])
+            ->map(fn (string $skill): string => trim($skill))
+            ->filter()
+            ->take(8)
+            ->values()
+            ->all();
+    }
+
+    private function extractUrl(string $text): ?string
+    {
+        if (preg_match('/https?:\/\/[^\s<>"\']+/u', $text, $matches)) {
+            return rtrim($matches[0], '。、)');
+        }
+
+        return null;
     }
 
     private function redirectUri(): string

@@ -230,8 +230,8 @@
           <div>マッチング</div>
         </div>
         <div class="side-panel">
-          <strong>次の実装候補</strong>
-          <p>求人CRUD、Gmail OAuth、Python スコアリングをこの Laravel 基盤へ追加していきます。</p>
+          <strong>実装済み</strong>
+          <p>求人CRUD、希望条件、マッチング、Gmail OAuth、本文抽出の土台まで動きます。</p>
         </div>
       </aside>
 
@@ -250,15 +250,15 @@
         <section class="grid">
           <article class="card">
             <h2>Gmail 取り込み</h2>
-            <p>求人・スカウト・エージェントのメールから会社名、年収、勤務地、技術を抽出する予定です。</p>
+            <p>求人・スカウト・エージェントのメール本文から会社名、職種、業界、年収、勤務地、URLを抽出します。</p>
           </article>
           <article class="card">
             <h2>求人管理</h2>
-            <p>未確認、気になる、応募したい、応募済み、見送りなどのステータスで整理します。</p>
+            <p>未確認、気になる、応募したい、応募済み、見送りなどのステータスで、多様な職種の求人を整理します。</p>
           </article>
           <article class="card">
             <h2>マッチング</h2>
-            <p>希望年収、勤務地、リモート、技術スタックをもとに応募優先度を算出します。</p>
+            <p>希望職種、業界、年収、勤務地、リモート、スキル・経験をもとに応募優先度を算出します。</p>
           </article>
         </section>
 
@@ -271,6 +271,7 @@
         <section class="commands">
           <strong>アプリ画面</strong>
           <a class="button" href="{{ route('jobs.index') }}">受信求人を開く</a>
+          <a class="button" href="{{ route('gmail.index') }}">Gmail 連携を開く</a>
         </section>
       </main>
     </div>
