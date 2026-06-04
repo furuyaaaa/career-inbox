@@ -320,6 +320,35 @@
         color: var(--warning);
       }
 
+      .option-group {
+        display: grid;
+        gap: 10px;
+      }
+
+      .option-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .option-button {
+        min-height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #ffffff;
+        color: #344249;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 0 12px;
+      }
+
+      .option-button.active {
+        border-color: var(--primary);
+        background: #edf4f2;
+        color: var(--primary);
+      }
+
       .match-score {
         display: grid;
         width: 48px;

@@ -46,6 +46,22 @@ class PreferenceMatchingTest extends TestCase
         $this->assertSame(['SES', '常駐のみ'], $profile->excluded_keywords);
     }
 
+    public function test_preferences_show_selectable_option_buttons(): void
+    {
+        PreferenceProfile::primary();
+
+        $response = $this->get('/preferences');
+
+        $response
+            ->assertOk()
+            ->assertSee('候補ボタンで選択しつつ')
+            ->assertSee('data-option-value="営業"', false)
+            ->assertSee('data-option-value="SaaS"', false)
+            ->assertSee('data-option-value="フルリモート"', false)
+            ->assertSee('data-option-value="法人営業"', false)
+            ->assertSee('data-option-value="SES"', false);
+    }
+
     public function test_jobs_can_be_sorted_by_matching_score(): void
     {
         PreferenceProfile::primary()->update([
