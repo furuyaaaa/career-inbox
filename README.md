@@ -89,6 +89,12 @@ email: test@example.com
 password: password
 ```
 
+ログインできない場合は、デモユーザーがローカルDBに入っていない可能性があります。以下を実行してから、もう一度ログインしてください。
+
+```bash
+docker compose exec app php artisan db:seed --class=DemoUserSeeder --force
+```
+
 求人一覧では、会社名・求人タイトル・職種・業界・勤務地のキーワード検索、ステータス絞り込み、リモート条件絞り込みができます。
 
 希望条件には、希望年収、希望職種、希望業界、勤務地、リモート条件、活かしたいスキル・経験、除外キーワードを登録できます。
@@ -182,7 +188,6 @@ Laravel のサービスクラスで、自分の希望条件と求人情報を比
 
 - Laravel
 - PHP
-- Blade
 - Blade
 
 ### データベース
