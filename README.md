@@ -45,6 +45,19 @@ http://localhost:8080
 docker compose exec app php artisan migrate
 ```
 
+デモユーザー、希望条件、求人、Gmail取り込み履歴を投入する場合はシーダーを実行します。
+
+```bash
+docker compose exec app php artisan db:seed --force
+```
+
+個別に投入したい場合は以下も使えます。
+
+```bash
+docker compose exec app php artisan db:seed --class=DemoUserSeeder --force
+docker compose exec app php artisan db:seed --class=DemoCareerInboxSeeder --force
+```
+
 フロントエンドの Vite 開発サーバーも使う場合は、`frontend` profile を付けて起動します。
 
 ```bash
