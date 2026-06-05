@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('preferences', [PreferenceProfileController::class, 'edit'])->name('preferences.edit');
     Route::put('preferences', [PreferenceProfileController::class, 'update'])->name('preferences.update');
     Route::get('gmail', [GmailController::class, 'index'])->name('gmail.index');
+    Route::put('gmail/settings', [GmailController::class, 'updateSettings'])->name('gmail.settings.update');
     Route::get('gmail/connect', [GmailController::class, 'connect'])->name('gmail.connect');
     Route::get('gmail/callback', [GmailController::class, 'callback'])->name('gmail.callback');
     Route::post('gmail/import', [GmailController::class, 'import'])->name('gmail.import');

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\GmailImport;
 use App\Models\GmailConnection;
+use App\Models\GmailOauthSetting;
 use App\Models\JobPost;
 use App\Models\User;
 use App\Services\GmailImportService;
@@ -29,7 +30,45 @@ class GmailIntegrationTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('Gmail 連携')
-            ->assertSee('デモ取り込み');
+            ->assertSee('デモ取り込み')
+            ->assertSee('OAuth 設定')
+            ->assertSee('gmail/callback');
+    }
+
+    public function test_google_oauth_settings_can_be_saved(): void
+    {
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->put('/gmail/settings', [
+                '_token' => 'test-token',
+                'client_id' => 'demo-client.apps.googleusercontent.com',
+                'client_secret' => 'demo-secret',
+                'redirect_uri' => 'http://localhost:8080/gmail/callback',
+            ]);
+
+        $response
+            ->assertRedirect('/gmail')
+            ->assertSessionHas('status', 'Google OAuth 設定を保存しました。続けて「Gmail を接続」を押してください。');
+
+        $setting = GmailOauthSetting::current();
+
+        $this->assertSame('demo-client.apps.googleusercontent.com', $setting->client_id);
+        $this->assertSame('demo-secret', $setting->client_secret);
+        $this->assertSame('http://localhost:8080/gmail/callback', $setting->redirect_uri);
+    }
+
+    public function test_connect_uses_saved_google_oauth_settings(): void
+    {
+        GmailOauthSetting::current()->update([
+            'client_id' => 'demo-client.apps.googleusercontent.com',
+            'client_secret' => 'demo-secret',
+            'redirect_uri' => 'http://localhost:8080/gmail/callback',
+        ]);
+
+        $response = $this->get('/gmail/connect');
+
+        $response->assertRedirectContains('https://accounts.google.com/o/oauth2/v2/auth');
+        $response->assertRedirectContains('client_id=demo-client.apps.googleusercontent.com');
+        $response->assertRedirectContains('redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fgmail%2Fcallback');
     }
 
     public function test_demo_import_creates_job_posts_from_gmail(): void

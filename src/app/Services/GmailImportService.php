@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\GmailConnection;
 use App\Models\GmailImport;
+use App\Models\GmailOauthSetting;
 use App\Models\JobPost;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
@@ -21,7 +22,7 @@ class GmailImportService
         $this->assertConfigured();
 
         return 'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query([
-            'client_id' => config('services.google.client_id'),
+            'client_id' => $this->clientId(),
             'redirect_uri' => $this->redirectUri(),
             'response_type' => 'code',
             'scope' => implode(' ', [self::GMAIL_READONLY_SCOPE, self::USERINFO_EMAIL_SCOPE]),
@@ -37,8 +38,8 @@ class GmailImportService
 
         $token = Http::asForm()
             ->post('https://oauth2.googleapis.com/token', [
-                'client_id' => config('services.google.client_id'),
-                'client_secret' => config('services.google.client_secret'),
+                'client_id' => $this->clientId(),
+                'client_secret' => $this->clientSecret(),
                 'redirect_uri' => $this->redirectUri(),
                 'grant_type' => 'authorization_code',
                 'code' => $code,
@@ -187,8 +188,7 @@ class GmailImportService
 
     public function configured(): bool
     {
-        return filled(config('services.google.client_id'))
-            && filled(config('services.google.client_secret'));
+        return filled($this->clientId()) && filled($this->clientSecret());
     }
 
     private function validAccessToken(GmailConnection $connection): string
@@ -203,8 +203,8 @@ class GmailImportService
 
         $token = Http::asForm()
             ->post('https://oauth2.googleapis.com/token', [
-                'client_id' => config('services.google.client_id'),
-                'client_secret' => config('services.google.client_secret'),
+                'client_id' => $this->clientId(),
+                'client_secret' => $this->clientSecret(),
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $connection->refresh_token,
             ])
@@ -484,7 +484,17 @@ class GmailImportService
 
     private function redirectUri(): string
     {
-        return config('services.google.redirect') ?: url('/gmail/callback');
+        return GmailOauthSetting::current()->redirect_uri ?: config('services.google.redirect') ?: url('/gmail/callback');
+    }
+
+    private function clientId(): ?string
+    {
+        return GmailOauthSetting::current()->client_id ?: config('services.google.client_id');
+    }
+
+    private function clientSecret(): ?string
+    {
+        return GmailOauthSetting::current()->client_secret ?: config('services.google.client_secret');
     }
 
     private function assertConfigured(): void

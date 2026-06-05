@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GmailConnection;
 use App\Models\GmailImport;
+use App\Models\GmailOauthSetting;
 use App\Services\GmailImportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,8 +24,34 @@ class GmailController extends Controller
         return view('gmail.index', [
             'connection' => GmailConnection::primary(),
             'configured' => $this->gmail->configured(),
+            'oauthSetting' => GmailOauthSetting::current(),
             'imports' => GmailImport::with('jobPost')->latest()->paginate(10),
         ]);
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'client_id' => ['required', 'string', 'max:255'],
+            'client_secret' => ['nullable', 'string', 'max:2000'],
+            'redirect_uri' => ['required', 'url', 'max:2048'],
+        ]);
+
+        $setting = GmailOauthSetting::current();
+        $setting->fill([
+            'client_id' => $data['client_id'],
+            'redirect_uri' => $data['redirect_uri'],
+        ]);
+
+        if ($request->filled('client_secret')) {
+            $setting->client_secret = $data['client_secret'];
+        }
+
+        $setting->save();
+
+        return redirect()
+            ->route('gmail.index')
+            ->with('status', 'Google OAuth 設定を保存しました。続けて「Gmail を接続」を押してください。');
     }
 
     public function connect(Request $request): RedirectResponse
