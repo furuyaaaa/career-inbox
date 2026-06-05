@@ -7,7 +7,7 @@
     <div>
       <p class="eyebrow">Preferences</p>
       <h1>希望条件</h1>
-      <p class="muted">マッチングスコアの基準になる条件です。候補ボタンで選択しつつ、必要な条件は直接入力できます。</p>
+      <p class="muted">マッチングスコアの基準になる条件です。候補ボタンで選択しつつ、候補にない条件は追加欄から追記できます。</p>
     </div>
     <a class="button secondary" href="{{ route('jobs.index', ['sort' => 'match']) }}">マッチ順を見る</a>
   </header>
@@ -86,6 +86,13 @@
             <button class="option-button" type="button" data-option-value="{{ $option }}">{{ $option }}</button>
           @endforeach
         </div>
+        <div class="custom-option-row">
+          <label>
+            候補にない条件を追加
+            <input data-custom-option-input placeholder="{{ $group['label'] }}を追加">
+          </label>
+          <button class="button secondary" type="button" data-custom-option-add>追加</button>
+        </div>
       </div>
     @endforeach
 
@@ -124,6 +131,34 @@
           input.value = nextValues.join(', ');
           syncButtons(group);
         });
+      });
+
+      const customInput = group.querySelector('[data-custom-option-input]');
+      const customAddButton = group.querySelector('[data-custom-option-add]');
+      const addCustomValue = () => {
+        const value = customInput.value.trim();
+
+        if (!value) {
+          return;
+        }
+
+        const values = splitValues(input.value);
+
+        if (!values.includes(value)) {
+          input.value = [...values, value].join(', ');
+        }
+
+        customInput.value = '';
+        syncButtons(group);
+        input.focus();
+      };
+
+      customAddButton.addEventListener('click', addCustomValue);
+      customInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          addCustomValue();
+        }
       });
 
       input.addEventListener('input', () => syncButtons(group));

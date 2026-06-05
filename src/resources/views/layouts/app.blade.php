@@ -349,6 +349,21 @@
         color: var(--primary);
       }
 
+      .custom-option-row {
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) auto;
+        gap: 8px;
+        align-items: end;
+      }
+
+      .custom-option-row input {
+        min-height: 36px;
+      }
+
+      .custom-option-row .button {
+        min-height: 36px;
+      }
+
       .match-score {
         display: grid;
         width: 48px;

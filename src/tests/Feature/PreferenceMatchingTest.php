@@ -54,7 +54,9 @@ class PreferenceMatchingTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('候補ボタンで選択しつつ')
+            ->assertSee('候補にない条件は追加欄から追記できます')
+            ->assertSee('候補にない条件を追加')
+            ->assertSee('data-custom-option-add', false)
             ->assertSee('data-option-value="営業"', false)
             ->assertSee('data-option-value="SaaS"', false)
             ->assertSee('data-option-value="フルリモート"', false)
