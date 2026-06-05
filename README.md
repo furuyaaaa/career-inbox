@@ -203,6 +203,12 @@ Laravel のサービスクラスで、自分の希望条件と求人情報を比
 - Git
 - GitHub
 
+## 開発方針
+
+コード作成時の設計・セキュリティ・テスト方針は以下にまとめています。
+
+- [Development Guidelines](docs/development-guidelines.md)
+
 ## データ設計案
 
 初期段階では、シンプルに `job_posts` テーブルを中心に作成します。
