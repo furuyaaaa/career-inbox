@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\GmailImport;
 use App\Models\GmailConnection;
+use App\Models\GmailOauthSetting;
 use App\Models\JobPost;
+use App\Models\User;
 use App\Services\GmailImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -14,14 +16,59 @@ class GmailIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create());
+    }
+
     public function test_gmail_page_loads(): void
     {
         $response = $this->get('/gmail');
 
         $response
             ->assertOk()
-            ->assertSee('Gmail 連携')
-            ->assertSee('デモ取り込み');
+            ->assertSee('Gmail 連携・検索')
+            ->assertSee('デモ取り込み')
+            ->assertSee('OAuth 設定')
+            ->assertSee('gmail/callback');
+    }
+
+    public function test_google_oauth_settings_can_be_saved(): void
+    {
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->put('/gmail/settings', [
+                '_token' => 'test-token',
+                'client_id' => 'demo-client.apps.googleusercontent.com',
+                'client_secret' => 'demo-secret',
+                'redirect_uri' => 'http://localhost:8080/gmail/callback',
+            ]);
+
+        $response
+            ->assertRedirect('/gmail')
+            ->assertSessionHas('status', 'Google OAuth 設定を保存しました。続けて「Gmail を接続」を押してください。');
+
+        $setting = GmailOauthSetting::current();
+
+        $this->assertSame('demo-client.apps.googleusercontent.com', $setting->client_id);
+        $this->assertSame('demo-secret', $setting->client_secret);
+        $this->assertSame('http://localhost:8080/gmail/callback', $setting->redirect_uri);
+    }
+
+    public function test_connect_uses_saved_google_oauth_settings(): void
+    {
+        GmailOauthSetting::current()->update([
+            'client_id' => 'demo-client.apps.googleusercontent.com',
+            'client_secret' => 'demo-secret',
+            'redirect_uri' => 'http://localhost:8080/gmail/callback',
+        ]);
+
+        $response = $this->get('/gmail/connect');
+
+        $response->assertRedirectContains('https://accounts.google.com/o/oauth2/v2/auth');
+        $response->assertRedirectContains('client_id=demo-client.apps.googleusercontent.com');
+        $response->assertRedirectContains('redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fgmail%2Fcallback');
     }
 
     public function test_demo_import_creates_job_posts_from_gmail(): void
@@ -52,6 +99,15 @@ class GmailIntegrationTest extends TestCase
         $response
             ->assertRedirect('/gmail')
             ->assertSessionHas('status', 'Google OAuth の認証情報が未設定です。');
+    }
+
+    public function test_callback_without_oauth_state_returns_to_gmail_page(): void
+    {
+        $response = $this->get('/gmail/callback');
+
+        $response
+            ->assertRedirect('/gmail')
+            ->assertSessionHas('status', 'Gmail 連携は、Gmail 連携画面の「Gmail を接続」から開始してください。');
     }
 
     public function test_import_recent_extracts_job_fields_from_gmail_body(): void

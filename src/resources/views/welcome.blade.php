@@ -226,7 +226,7 @@
         <div class="nav">
           <div>受信求人</div>
           <div>希望条件</div>
-          <div>Gmail 連携</div>
+          <div>Gmail 連携・検索</div>
           <div>マッチング</div>
         </div>
         <div class="side-panel">
@@ -271,7 +271,7 @@
         <section class="commands">
           <strong>アプリ画面</strong>
           <a class="button" href="{{ route('jobs.index') }}">受信求人を開く</a>
-          <a class="button" href="{{ route('gmail.index') }}">Gmail 連携を開く</a>
+          <a class="button" href="{{ route('gmail.index') }}">Gmail 連携・検索を開く</a>
         </section>
       </main>
     </div>

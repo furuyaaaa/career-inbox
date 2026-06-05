@@ -45,6 +45,19 @@ http://localhost:8080
 docker compose exec app php artisan migrate
 ```
 
+デモユーザー、希望条件、求人、Gmail取り込み履歴を投入する場合はシーダーを実行します。
+
+```bash
+docker compose exec app php artisan db:seed --force
+```
+
+個別に投入したい場合は以下も使えます。
+
+```bash
+docker compose exec app php artisan db:seed --class=DemoUserSeeder --force
+docker compose exec app php artisan db:seed --class=DemoCareerInboxSeeder --force
+```
+
 フロントエンドの Vite 開発サーバーも使う場合は、`frontend` profile を付けて起動します。
 
 ```bash
@@ -62,10 +75,25 @@ docker compose --profile frontend up -d --build
 
 Laravel アプリ側では、以下の画面を実装済みです。
 
+- `http://localhost:8080/login`: ログイン
+- `http://localhost:8080/register`: 新規登録
 - `http://localhost:8080/jobs`: 求人一覧
 - `http://localhost:8080/jobs/create`: 求人登録
 - `http://localhost:8080/preferences`: 希望条件の編集
 - `http://localhost:8080/gmail`: Gmail 連携・求人メール取り込み
+
+`php artisan db:seed` 実行後は、以下のデモユーザーでログインできます。
+
+```text
+email: test@example.com
+password: password
+```
+
+ログインできない場合は、デモユーザーがローカルDBに入っていない可能性があります。以下を実行してから、もう一度ログインしてください。
+
+```bash
+docker compose exec app php artisan db:seed --class=DemoUserSeeder --force
+```
 
 求人一覧では、会社名・求人タイトル・職種・業界・勤務地のキーワード検索、ステータス絞り込み、リモート条件絞り込みができます。
 
@@ -110,6 +138,7 @@ GOOGLE_REDIRECT_URI=http://localhost:8080/gmail/callback
 
 ### 求人管理
 
+- ログイン、新規登録、ログアウト
 - 求人情報の登録・編集・削除
 - 会社名、求人タイトル、勤務地、年収、雇用形態の管理
 - 職種、業界、スキル・経験、リモート可否、求人URL、メモの管理
@@ -159,7 +188,6 @@ Laravel のサービスクラスで、自分の希望条件と求人情報を比
 
 - Laravel
 - PHP
-- Blade
 - Blade
 
 ### データベース

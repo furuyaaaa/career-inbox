@@ -7,7 +7,7 @@
     <div>
       <p class="eyebrow">Preferences</p>
       <h1>希望条件</h1>
-      <p class="muted">マッチングスコアの基準になる条件です。職種を問わず、カンマ区切りで複数指定できます。</p>
+      <p class="muted">マッチングスコアの基準になる条件です。候補ボタンで選択しつつ、必要な条件は直接入力できます。</p>
     </div>
     <a class="button secondary" href="{{ route('jobs.index', ['sort' => 'match']) }}">マッチ順を見る</a>
   </header>
@@ -34,39 +34,100 @@
       </select>
     </label>
 
-    <label class="span-2">
-      希望職種カテゴリ
-      <input name="preferred_occupations_text" value="{{ old('preferred_occupations_text', implode(', ', $profile->preferred_occupations ?? [])) }}" placeholder="営業, マーケティング, 経理, カスタマーサクセス">
-    </label>
+    @php
+      $optionGroups = [
+          'preferred_occupations_text' => [
+              'label' => '希望職種カテゴリ',
+              'value' => old('preferred_occupations_text', implode(', ', $profile->preferred_occupations ?? [])),
+              'placeholder' => '営業, マーケティング, 経理, カスタマーサクセス',
+              'options' => ['営業', 'マーケティング', 'カスタマーサクセス', '企画', '管理部門', '経理', '人事', 'エンジニア', 'デザイン', '販売', 'コンサルタント'],
+          ],
+          'preferred_industries_text' => [
+              'label' => '希望業界',
+              'value' => old('preferred_industries_text', implode(', ', $profile->preferred_industries ?? [])),
+              'placeholder' => 'IT, 人材, メーカー, 医療, 教育',
+              'options' => ['IT', 'SaaS', '人材', '教育', '金融', '医療', 'メーカー', '小売', '広告', '不動産', 'コンサルティング'],
+          ],
+          'preferred_locations_text' => [
+              'label' => '希望勤務地',
+              'value' => old('preferred_locations_text', implode(', ', $profile->preferred_locations ?? [])),
+              'placeholder' => '東京, 全国',
+              'options' => ['東京', '神奈川', '埼玉', '千葉', '大阪', '京都', '兵庫', '名古屋', '福岡', '札幌', '全国', '海外'],
+          ],
+          'preferred_remote_types_text' => [
+              'label' => '希望リモート条件',
+              'value' => old('preferred_remote_types_text', implode(', ', $profile->preferred_remote_types ?? [])),
+              'placeholder' => 'フルリモート, ハイブリッド, 週3リモート',
+              'options' => ['フルリモート', 'ハイブリッド', '週3リモート', '週1リモート', '出社中心', '不明'],
+          ],
+          'preferred_technologies_text' => [
+              'label' => '活かしたいスキル・経験キーワード',
+              'value' => old('preferred_technologies_text', implode(', ', $profile->preferred_technologies ?? [])),
+              'placeholder' => '法人営業, CRM, データ分析, 経理, 英語, Laravel',
+              'options' => ['法人営業', 'CRM', 'データ分析', '企画', '広告運用', '採用', '経理', '月次決算', '顧客折衝', '英語', 'Laravel', 'Python', 'AWS'],
+          ],
+          'excluded_keywords_text' => [
+              'label' => '除外キーワード',
+              'value' => old('excluded_keywords_text', implode(', ', $profile->excluded_keywords ?? [])),
+              'placeholder' => 'SES, 常駐のみ',
+              'options' => ['SES', '常駐のみ', '飛び込み営業', '夜勤', '転勤あり', '土日勤務', '低単価', '完全出社'],
+          ],
+      ];
+    @endphp
 
-    <label class="span-2">
-      希望業界
-      <input name="preferred_industries_text" value="{{ old('preferred_industries_text', implode(', ', $profile->preferred_industries ?? [])) }}" placeholder="IT, 人材, メーカー, 医療, 教育">
-    </label>
-
-    <label class="span-2">
-      希望勤務地
-      <input name="preferred_locations_text" value="{{ old('preferred_locations_text', implode(', ', $profile->preferred_locations ?? [])) }}" placeholder="東京, 全国">
-    </label>
-
-    <label class="span-2">
-      希望リモート条件
-      <input name="preferred_remote_types_text" value="{{ old('preferred_remote_types_text', implode(', ', $profile->preferred_remote_types ?? [])) }}" placeholder="フルリモート, ハイブリッド, 週3リモート">
-    </label>
-
-    <label class="span-2">
-      活かしたいスキル・経験キーワード
-      <input name="preferred_technologies_text" value="{{ old('preferred_technologies_text', implode(', ', $profile->preferred_technologies ?? [])) }}" placeholder="法人営業, CRM, データ分析, 経理, 英語, Laravel">
-    </label>
-
-    <label class="span-2">
-      除外キーワード
-      <input name="excluded_keywords_text" value="{{ old('excluded_keywords_text', implode(', ', $profile->excluded_keywords ?? [])) }}" placeholder="SES, 常駐のみ">
-    </label>
+    @foreach ($optionGroups as $name => $group)
+      <div class="option-group span-2" data-option-group>
+        <label>
+          {{ $group['label'] }}
+          <input data-option-input name="{{ $name }}" value="{{ $group['value'] }}" placeholder="{{ $group['placeholder'] }}">
+        </label>
+        <div class="option-buttons" aria-label="{{ $group['label'] }}の候補">
+          @foreach ($group['options'] as $option)
+            <button class="option-button" type="button" data-option-value="{{ $option }}">{{ $option }}</button>
+          @endforeach
+        </div>
+      </div>
+    @endforeach
 
     <div class="actions span-2">
       <button class="button" type="submit">保存する</button>
       <a class="button secondary" href="{{ route('jobs.index') }}">キャンセル</a>
     </div>
   </form>
+
+  <script>
+    const splitValues = (value) => value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    const syncButtons = (group) => {
+      const input = group.querySelector('[data-option-input]');
+      const values = splitValues(input.value);
+
+      group.querySelectorAll('[data-option-value]').forEach((button) => {
+        button.classList.toggle('active', values.includes(button.dataset.optionValue));
+      });
+    };
+
+    document.querySelectorAll('[data-option-group]').forEach((group) => {
+      const input = group.querySelector('[data-option-input]');
+
+      group.querySelectorAll('[data-option-value]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const value = button.dataset.optionValue;
+          const values = splitValues(input.value);
+          const nextValues = values.includes(value)
+            ? values.filter((item) => item !== value)
+            : [...values, value];
+
+          input.value = nextValues.join(', ');
+          syncButtons(group);
+        });
+      });
+
+      input.addEventListener('input', () => syncButtons(group));
+      syncButtons(group);
+    });
+  </script>
 @endsection

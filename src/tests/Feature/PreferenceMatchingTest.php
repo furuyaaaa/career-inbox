@@ -4,12 +4,20 @@ namespace Tests\Feature;
 
 use App\Models\JobPost;
 use App\Models\PreferenceProfile;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PreferenceMatchingTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create());
+    }
 
     public function test_preferences_can_be_updated(): void
     {
@@ -36,6 +44,22 @@ class PreferenceMatchingTest extends TestCase
         $this->assertSame(['IT', 'SaaS'], $profile->preferred_industries);
         $this->assertSame(['法人営業', 'CRM', 'データ分析'], $profile->preferred_technologies);
         $this->assertSame(['SES', '常駐のみ'], $profile->excluded_keywords);
+    }
+
+    public function test_preferences_show_selectable_option_buttons(): void
+    {
+        PreferenceProfile::primary();
+
+        $response = $this->get('/preferences');
+
+        $response
+            ->assertOk()
+            ->assertSee('候補ボタンで選択しつつ')
+            ->assertSee('data-option-value="営業"', false)
+            ->assertSee('data-option-value="SaaS"', false)
+            ->assertSee('data-option-value="フルリモート"', false)
+            ->assertSee('data-option-value="法人営業"', false)
+            ->assertSee('data-option-value="SES"', false);
     }
 
     public function test_jobs_can_be_sorted_by_matching_score(): void

@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Gmail 連携 | Career Inbox')
+@section('title', 'Gmail 連携・検索 | Career Inbox')
 
 @section('content')
   <section class="page-head">
     <div>
       <p class="eyebrow">Gmail Integration</p>
-      <h1>Gmail 連携</h1>
+      <h1>Gmail 連携・検索</h1>
       <p class="muted">求人メールを検索し、Career Inbox の求人として取り込みます。</p>
     </div>
     <div class="actions">
@@ -43,6 +43,33 @@
         @endif
       </p>
     </div>
+
+    <form class="panel" method="post" action="{{ route('gmail.settings.update') }}">
+      @csrf
+      @method('PUT')
+      <h2>OAuth 設定</h2>
+      <p class="muted" style="margin-top: 10px;">Google Cloud のOAuthクライアント情報を登録します。</p>
+      <div class="form-grid" style="margin-top: 14px;">
+        <label class="span-2">
+          Client ID
+          <input name="client_id" value="{{ old('client_id', $oauthSetting->client_id) }}" placeholder="xxxxx.apps.googleusercontent.com">
+        </label>
+        <label class="span-2">
+          Client Secret
+          <input name="client_secret" type="password" placeholder="{{ $oauthSetting->client_secret ? '保存済み。変更する場合のみ入力' : 'Google Cloud の Client Secret' }}">
+        </label>
+        <label class="span-2">
+          リダイレクトURI
+          <input name="redirect_uri" value="{{ old('redirect_uri', $oauthSetting->redirect_uri ?: url('/gmail/callback')) }}">
+        </label>
+        <div class="span-2">
+          <p class="muted">Google Cloud の「承認済みのリダイレクト URI」に、上のリダイレクトURIを登録してください。</p>
+        </div>
+        <div class="actions span-2">
+          <button class="button" type="submit">OAuth 設定を保存</button>
+        </div>
+      </div>
+    </form>
 
     <form class="panel" method="post" action="{{ route('gmail.import') }}">
       @csrf
