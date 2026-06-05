@@ -16,11 +16,14 @@ class GmailIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    private User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create());
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
     }
 
     public function test_gmail_page_loads(): void
@@ -81,6 +84,7 @@ class GmailIntegrationTest extends TestCase
         $this->assertSame(3, JobPost::where('source', 'Gmail')->count());
         $this->assertSame(3, GmailImport::where('status', 'demo')->count());
         $this->assertDatabaseHas('job_posts', [
+            'user_id' => $this->user->id,
             'company_name' => 'Hikari Cloud',
             'occupation' => '営業',
             'industry' => 'IT',
@@ -113,6 +117,7 @@ class GmailIntegrationTest extends TestCase
     public function test_import_recent_extracts_job_fields_from_gmail_body(): void
     {
         $connection = GmailConnection::create([
+            'user_id' => $this->user->id,
             'email' => 'me@example.com',
             'access_token' => 'access-token',
             'token_expires_at' => now()->addHour(),
@@ -154,6 +159,7 @@ class GmailIntegrationTest extends TestCase
 
         $this->assertSame(1, $count);
         $this->assertDatabaseHas('job_posts', [
+            'user_id' => $this->user->id,
             'company_name' => 'Canvas AI',
             'title' => 'カスタマーサクセス',
             'occupation' => 'カスタマーサクセス',
@@ -170,6 +176,7 @@ class GmailIntegrationTest extends TestCase
 
         $this->assertSame(['CRM', 'データ分析', '顧客折衝'], $jobPost->technologies);
         $this->assertDatabaseHas('gmail_imports', [
+            'user_id' => $this->user->id,
             'gmail_connection_id' => $connection->id,
             'gmail_message_id' => 'message-1',
             'job_post_id' => $jobPost->id,

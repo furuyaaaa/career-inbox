@@ -32,7 +32,7 @@ class GmailImportService
         ]);
     }
 
-    public function exchangeCode(string $code): GmailConnection
+    public function exchangeCode(string $code, int $userId): GmailConnection
     {
         $this->assertConfigured();
 
@@ -50,10 +50,14 @@ class GmailImportService
         $email = $this->fetchEmail($token['access_token']);
 
         return GmailConnection::updateOrCreate(
-            ['email' => $email],
             [
+                'user_id' => $userId,
+                'email' => $email,
+            ],
+            [
+                'user_id' => $userId,
                 'access_token' => $token['access_token'],
-                'refresh_token' => $token['refresh_token'] ?? GmailConnection::where('email', $email)->value('refresh_token'),
+                'refresh_token' => $token['refresh_token'] ?? GmailConnection::where('user_id', $userId)->where('email', $email)->value('refresh_token'),
                 'token_expires_at' => now()->addSeconds((int) ($token['expires_in'] ?? 3600)),
                 'scopes' => explode(' ', (string) ($token['scope'] ?? '')),
                 'connected_at' => now(),
@@ -77,7 +81,7 @@ class GmailImportService
         foreach ($messageIds as $message) {
             $messageId = $message['id'] ?? null;
 
-            if (! $messageId || GmailImport::where('gmail_message_id', $messageId)->exists()) {
+            if (! $messageId || GmailImport::where('user_id', $connection->user_id)->where('gmail_message_id', $messageId)->exists()) {
                 continue;
             }
 
@@ -86,9 +90,10 @@ class GmailImportService
                 ->throw()
                 ->json();
 
-            $jobPost = $this->jobPostFromMessage($payload);
+            $jobPost = $this->jobPostFromMessage($payload, $connection);
 
             GmailImport::create([
+                'user_id' => $connection->user_id,
                 'gmail_connection_id' => $connection->id,
                 'gmail_message_id' => $messageId,
                 'subject' => $this->header($payload, 'Subject'),
@@ -105,7 +110,7 @@ class GmailImportService
         return $count;
     }
 
-    public function createDemoImports(): int
+    public function createDemoImports(int $userId): int
     {
         $samples = [
             [
@@ -154,6 +159,7 @@ class GmailImportService
 
         foreach ($samples as $sample) {
             $jobPost = JobPost::create([
+                'user_id' => $userId,
                 'company_name' => $sample['company_name'],
                 'title' => $sample['title'],
                 'occupation' => $sample['occupation'],
@@ -173,6 +179,7 @@ class GmailImportService
             ]);
 
             GmailImport::create([
+                'user_id' => $userId,
                 'gmail_message_id' => $sample['message_id'],
                 'subject' => $sample['subject'],
                 'sender' => $sample['sender'],
@@ -220,7 +227,7 @@ class GmailImportService
         return $connection->access_token;
     }
 
-    private function jobPostFromMessage(array $payload): JobPost
+    private function jobPostFromMessage(array $payload, GmailConnection $connection): JobPost
     {
         $subject = $this->header($payload, 'Subject') ?: 'Gmail 取り込み求人';
         $sender = $this->header($payload, 'From');
@@ -230,6 +237,7 @@ class GmailImportService
         $fields = $this->extractJobFields($subject, $body);
 
         return JobPost::create([
+            'user_id' => $connection->user_id,
             'company_name' => $fields['company_name'] ?? $this->guessCompanyName($subject, $sender),
             'title' => $fields['title'] ?? $subject,
             'occupation' => $fields['occupation'] ?? null,

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GmailImport extends Model
 {
     protected $fillable = [
+        'user_id',
         'gmail_connection_id',
         'gmail_message_id',
         'subject',

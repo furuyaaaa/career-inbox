@@ -6,27 +6,37 @@ use App\Models\GmailConnection;
 use App\Models\GmailImport;
 use App\Models\JobPost;
 use App\Models\PreferenceProfile;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DemoCareerInboxSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->seedPreferenceProfile();
-        $connection = $this->seedGmailConnection();
+        $user = User::query()->where('email', 'test@example.com')->firstOrFail();
+
+        $this->seedPreferenceProfile($user->id);
+        $connection = $this->seedGmailConnection($user->id);
 
         foreach ($this->jobPosts() as $jobPostData) {
             $jobPost = JobPost::query()->updateOrCreate(
                 [
+                    'user_id' => $user->id,
                     'company_name' => $jobPostData['company_name'],
                     'title' => $jobPostData['title'],
                 ],
-                collect($jobPostData)->except(['gmail_message_id', 'subject', 'sender', 'snippet'])->all(),
+                [
+                    ...collect($jobPostData)->except(['gmail_message_id', 'subject', 'sender', 'snippet'])->all(),
+                    'user_id' => $user->id,
+                ],
             );
 
             if (($jobPostData['source'] ?? null) === 'Gmail') {
                 GmailImport::query()->updateOrCreate(
-                    ['gmail_message_id' => $jobPostData['gmail_message_id']],
+                    [
+                        'user_id' => $user->id,
+                        'gmail_message_id' => $jobPostData['gmail_message_id'],
+                    ],
                     [
                         'gmail_connection_id' => $connection->id,
                         'subject' => $jobPostData['subject'],
@@ -41,9 +51,9 @@ class DemoCareerInboxSeeder extends Seeder
         }
     }
 
-    private function seedPreferenceProfile(): void
+    private function seedPreferenceProfile(int $userId): void
     {
-        PreferenceProfile::primary()->update([
+        PreferenceProfile::primary($userId)->update([
             'desired_salary_min' => 650,
             'preferred_occupations' => ['営業', 'マーケティング', 'カスタマーサクセス', 'エンジニア'],
             'preferred_industries' => ['IT', 'SaaS', '人材', '教育'],
@@ -55,11 +65,15 @@ class DemoCareerInboxSeeder extends Seeder
         ]);
     }
 
-    private function seedGmailConnection(): GmailConnection
+    private function seedGmailConnection(int $userId): GmailConnection
     {
         return GmailConnection::query()->updateOrCreate(
-            ['email' => 'demo.gmail@example.com'],
             [
+                'user_id' => $userId,
+                'email' => 'demo.gmail@example.com',
+            ],
+            [
+                'user_id' => $userId,
                 'access_token' => 'demo-access-token',
                 'refresh_token' => 'demo-refresh-token',
                 'token_expires_at' => now()->addHour(),

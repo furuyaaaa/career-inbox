@@ -11,16 +11,20 @@ class JobPostCrudTest extends TestCase
 {
     use RefreshDatabase;
 
+    private User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create());
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
     }
 
     public function test_job_posts_can_be_listed(): void
     {
         JobPost::factory()->create([
+            'user_id' => $this->user->id,
             'company_name' => 'Hikari Cloud',
             'title' => '法人営業',
             'occupation' => '営業',
@@ -33,6 +37,25 @@ class JobPostCrudTest extends TestCase
             ->assertOk()
             ->assertSee('Hikari Cloud')
             ->assertSee('法人営業');
+    }
+
+    public function test_job_posts_are_scoped_to_authenticated_user(): void
+    {
+        JobPost::factory()->create([
+            'user_id' => $this->user->id,
+            'company_name' => 'My Company',
+        ]);
+        JobPost::factory()->create([
+            'user_id' => User::factory()->create()->id,
+            'company_name' => 'Other Company',
+        ]);
+
+        $response = $this->get('/jobs');
+
+        $response
+            ->assertOk()
+            ->assertSee('My Company')
+            ->assertDontSee('Other Company');
     }
 
     public function test_job_post_can_be_created(): void
@@ -60,6 +83,7 @@ class JobPostCrudTest extends TestCase
         $response->assertRedirect('/jobs');
 
         $this->assertDatabaseHas('job_posts', [
+            'user_id' => $this->user->id,
             'company_name' => 'Canvas AI',
             'title' => 'カスタマーサクセス',
             'status' => '気になる',
@@ -74,6 +98,7 @@ class JobPostCrudTest extends TestCase
     public function test_job_post_can_be_updated(): void
     {
         $jobPost = JobPost::factory()->create([
+            'user_id' => $this->user->id,
             'status' => '未確認',
         ]);
 
@@ -106,6 +131,7 @@ class JobPostCrudTest extends TestCase
     public function test_job_post_can_be_deleted(): void
     {
         $jobPost = JobPost::factory()->create();
+        $jobPost->update(['user_id' => $this->user->id]);
 
         $response = $this->withSession(['_token' => 'test-token'])->delete("/jobs/{$jobPost->id}", [
             '_token' => 'test-token',
