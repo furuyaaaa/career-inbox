@@ -29,7 +29,7 @@ class GmailIntegrationTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Gmail 連携')
+            ->assertSee('Gmail 連携・検索')
             ->assertSee('デモ取り込み')
             ->assertSee('OAuth 設定')
             ->assertSee('gmail/callback');

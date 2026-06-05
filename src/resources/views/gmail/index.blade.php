@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Gmail 連携 | Career Inbox')
+@section('title', 'Gmail 連携・検索 | Career Inbox')
 
 @section('content')
   <section class="page-head">
     <div>
       <p class="eyebrow">Gmail Integration</p>
-      <h1>Gmail 連携</h1>
+      <h1>Gmail 連携・検索</h1>
       <p class="muted">求人メールを検索し、Career Inbox の求人として取り込みます。</p>
     </div>
     <div class="actions">

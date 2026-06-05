@@ -411,7 +411,7 @@
           @auth
             <a href="{{ route('jobs.index') }}" @class(['active' => request()->routeIs('jobs.*')])>受信求人</a>
             <a href="{{ route('preferences.edit') }}" @class(['active' => request()->routeIs('preferences.*')])>希望条件</a>
-            <a href="{{ route('gmail.index') }}" @class(['active' => request()->routeIs('gmail.*')])>Gmail 連携</a>
+            <a href="{{ route('gmail.index') }}" @class(['active' => request()->routeIs('gmail.*')])>Gmail 連携・検索</a>
             <a href="{{ route('jobs.index', ['sort' => 'match']) }}">マッチング</a>
           @else
             <a href="{{ route('login') }}" @class(['active' => request()->routeIs('login')])>ログイン</a>
