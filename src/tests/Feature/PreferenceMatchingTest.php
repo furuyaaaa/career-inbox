@@ -12,16 +12,19 @@ class PreferenceMatchingTest extends TestCase
 {
     use RefreshDatabase;
 
+    private User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create());
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
     }
 
     public function test_preferences_can_be_updated(): void
     {
-        PreferenceProfile::primary();
+        PreferenceProfile::primary($this->user->id);
 
         $response = $this->withSession(['_token' => 'test-token'])->put('/preferences', [
             '_token' => 'test-token',
@@ -37,7 +40,7 @@ class PreferenceMatchingTest extends TestCase
 
         $response->assertRedirect('/preferences');
 
-        $profile = PreferenceProfile::primary();
+        $profile = PreferenceProfile::primary($this->user->id);
 
         $this->assertSame(800, $profile->desired_salary_min);
         $this->assertSame(['営業', 'マーケティング'], $profile->preferred_occupations);
@@ -48,13 +51,15 @@ class PreferenceMatchingTest extends TestCase
 
     public function test_preferences_show_selectable_option_buttons(): void
     {
-        PreferenceProfile::primary();
+        PreferenceProfile::primary($this->user->id);
 
         $response = $this->get('/preferences');
 
         $response
             ->assertOk()
-            ->assertSee('候補ボタンで選択しつつ')
+            ->assertSee('候補にない条件は追加欄から追記できます')
+            ->assertSee('候補にない条件を追加')
+            ->assertSee('data-custom-option-add', false)
             ->assertSee('data-option-value="営業"', false)
             ->assertSee('data-option-value="SaaS"', false)
             ->assertSee('data-option-value="フルリモート"', false)
@@ -64,7 +69,7 @@ class PreferenceMatchingTest extends TestCase
 
     public function test_jobs_can_be_sorted_by_matching_score(): void
     {
-        PreferenceProfile::primary()->update([
+        PreferenceProfile::primary($this->user->id)->update([
             'desired_salary_min' => 700,
             'preferred_occupations' => ['営業', 'マーケティング'],
             'preferred_industries' => ['IT', 'SaaS'],
@@ -76,6 +81,7 @@ class PreferenceMatchingTest extends TestCase
         ]);
 
         JobPost::factory()->create([
+            'user_id' => $this->user->id,
             'company_name' => 'Low Match Co',
             'title' => '店舗スタッフ',
             'occupation' => '販売',
@@ -90,6 +96,7 @@ class PreferenceMatchingTest extends TestCase
         ]);
 
         JobPost::factory()->create([
+            'user_id' => $this->user->id,
             'company_name' => 'High Match Co',
             'title' => 'SaaS 法人営業',
             'occupation' => '営業',

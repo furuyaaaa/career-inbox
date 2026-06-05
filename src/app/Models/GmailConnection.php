@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class GmailConnection extends Model
 {
     protected $fillable = [
+        'user_id',
         'email',
         'access_token',
         'refresh_token',
@@ -27,9 +28,13 @@ class GmailConnection extends Model
         ];
     }
 
-    public static function primary(): ?self
+    public static function primary(?int $userId = null): ?self
     {
-        return self::latest('connected_at')->latest()->first();
+        return self::query()
+            ->when($userId !== null, fn ($query) => $query->where('user_id', $userId))
+            ->latest('connected_at')
+            ->latest()
+            ->first();
     }
 
     public function imports(): HasMany

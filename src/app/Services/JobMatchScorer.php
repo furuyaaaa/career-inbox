@@ -8,10 +8,8 @@ use Illuminate\Support\Str;
 
 class JobMatchScorer
 {
-    public function score(JobPost $jobPost, ?PreferenceProfile $profile = null): array
+    public function score(JobPost $jobPost, PreferenceProfile $profile): array
     {
-        $profile ??= PreferenceProfile::primary();
-
         $score = 20;
         $reasons = [];
         $excluded = $this->matchedExcludedKeywords($jobPost, $profile);

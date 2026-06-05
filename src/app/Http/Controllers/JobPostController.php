@@ -19,8 +19,8 @@ class JobPostController extends Controller
 
     public function index(Request $request): View
     {
-        $query = JobPost::query();
-        $profile = PreferenceProfile::primary();
+        $query = JobPost::query()->where('user_id', $request->user()->id);
+        $profile = PreferenceProfile::primary($request->user()->id);
 
         if ($request->filled('keyword')) {
             $keyword = $request->string('keyword')->toString();
@@ -82,20 +82,27 @@ class JobPostController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        JobPost::create($this->validated($request));
+        JobPost::create([
+            ...$this->validated($request),
+            'user_id' => $request->user()->id,
+        ]);
 
         return redirect()
             ->route('jobs.index')
             ->with('status', '求人を登録しました。');
     }
 
-    public function show(JobPost $job): View
+    public function show(Request $request, JobPost $job): View
     {
+        $this->authorizeOwner($request, $job);
+
         return view('jobs.show', ['jobPost' => $job]);
     }
 
-    public function edit(JobPost $job): View
+    public function edit(Request $request, JobPost $job): View
     {
+        $this->authorizeOwner($request, $job);
+
         return view('jobs.edit', [
             'jobPost' => $job,
             'statuses' => $this->statuses(),
@@ -106,6 +113,8 @@ class JobPostController extends Controller
 
     public function update(Request $request, JobPost $job): RedirectResponse
     {
+        $this->authorizeOwner($request, $job);
+
         $job->update($this->validated($request));
 
         return redirect()
@@ -113,8 +122,10 @@ class JobPostController extends Controller
             ->with('status', '求人を更新しました。');
     }
 
-    public function destroy(JobPost $job): RedirectResponse
+    public function destroy(Request $request, JobPost $job): RedirectResponse
     {
+        $this->authorizeOwner($request, $job);
+
         $job->delete();
 
         return redirect()
@@ -168,6 +179,11 @@ class JobPostController extends Controller
     private function employmentTypes(): array
     {
         return ['正社員', '契約社員', '業務委託', '副業', '不明'];
+    }
+
+    private function authorizeOwner(Request $request, JobPost $jobPost): void
+    {
+        abort_unless($jobPost->user_id === $request->user()->id, 404);
     }
 
     /**

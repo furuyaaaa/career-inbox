@@ -9,16 +9,16 @@ use Illuminate\View\View;
 
 class PreferenceProfileController extends Controller
 {
-    public function edit(): View
+    public function edit(Request $request): View
     {
         return view('preferences.edit', [
-            'profile' => PreferenceProfile::primary(),
+            'profile' => PreferenceProfile::primary($request->user()->id),
         ]);
     }
 
     public function update(Request $request): RedirectResponse
     {
-        $profile = PreferenceProfile::primary();
+        $profile = PreferenceProfile::primary($request->user()->id);
         $profile->update($this->validated($request));
 
         return redirect()

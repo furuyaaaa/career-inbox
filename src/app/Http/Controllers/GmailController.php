@@ -19,18 +19,23 @@ class GmailController extends Controller
     {
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         return view('gmail.index', [
-            'connection' => GmailConnection::primary(),
+            'connection' => GmailConnection::primary($request->user()->id),
             'configured' => $this->gmail->configured(),
             'oauthSetting' => GmailOauthSetting::current(),
-            'imports' => GmailImport::with('jobPost')->latest()->paginate(10),
+            'imports' => GmailImport::with('jobPost')
+                ->where('user_id', $request->user()->id)
+                ->latest()
+                ->paginate(10),
         ]);
     }
 
     public function updateSettings(Request $request): RedirectResponse
     {
+        abort_if(app()->isProduction(), 404);
+
         $data = $request->validate([
             'client_id' => ['required', 'string', 'max:255'],
             'client_secret' => ['nullable', 'string', 'max:2000'],
@@ -85,7 +90,10 @@ class GmailController extends Controller
         }
 
         try {
-            $connection = $this->gmail->exchangeCode($request->string('code')->toString());
+            $connection = $this->gmail->exchangeCode(
+                $request->string('code')->toString(),
+                $request->user()->id,
+            );
         } catch (Throwable $exception) {
             report($exception);
 
@@ -106,7 +114,7 @@ class GmailController extends Controller
             'limit' => ['required', 'integer', 'min:1', 'max:25'],
         ]);
 
-        $connection = GmailConnection::primary();
+        $connection = GmailConnection::primary($request->user()->id);
 
         if (! $connection) {
             return redirect()
@@ -129,9 +137,9 @@ class GmailController extends Controller
             ->with('status', "{$count}件のメールを求人として取り込みました。");
     }
 
-    public function demoImport(): RedirectResponse
+    public function demoImport(Request $request): RedirectResponse
     {
-        $count = $this->gmail->createDemoImports();
+        $count = $this->gmail->createDemoImports($request->user()->id);
 
         return redirect()
             ->route('gmail.index')

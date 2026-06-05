@@ -11,6 +11,7 @@ class PreferenceProfile extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'name',
         'desired_salary_min',
         'preferred_occupations',
@@ -36,10 +37,13 @@ class PreferenceProfile extends Model
         ];
     }
 
-    public static function primary(): self
+    public static function primary(?int $userId = null): self
     {
         return self::query()->firstOrCreate(
-            ['name' => 'default'],
+            [
+                'user_id' => $userId,
+                'name' => 'default',
+            ],
             [
                 'desired_salary_min' => 650,
                 'preferred_occupations' => ['営業', 'マーケティング', 'カスタマーサクセス', 'エンジニア'],
