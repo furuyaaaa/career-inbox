@@ -115,6 +115,8 @@ MATCHING_PYTHON_SCRIPT=/var/www/html/python/matching_service.py
 
 PHP版に戻す場合は `MATCHING_DRIVER=php` にします。どちらのドライバーも、求人と希望条件から `score` と `reasons` を返します。
 
+Python版の意味的マッチングで使う職種・業界・スキル・働き方の近い言葉は、`src/python/matching_terms.json` で管理します。
+
 ## Gmail 連携設定
 
 実際の Gmail から求人メールを取り込む場合は、Google Cloud で Gmail API を有効化し、OAuth クライアントを作成します。

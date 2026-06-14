@@ -1,46 +1,16 @@
 import json
 import sys
+from pathlib import Path
 
 
-SEMANTIC_GROUPS = {
-    "occupation": [
-        [
-            "営業",
-            "法人営業",
-            "フィールドセールス",
-            "インサイドセールス",
-            "アカウントエグゼクティブ",
-            "カスタマーサクセス",
-            "カスタマーサポート",
-            "CS",
-            "導入支援",
-            "オンボーディング",
-        ],
-        ["マーケティング", "マーケター", "広告運用", "グロース", "CRMマーケティング"],
-        ["エンジニア", "バックエンド", "フロントエンド", "Laravel", "Python", "Webエンジニア"],
-        ["人事", "採用", "HR", "労務"],
-        ["経理", "財務", "会計"],
-    ],
-    "industry": [
-        ["IT", "SaaS", "クラウド", "ソフトウェア", "AI", "DX"],
-        ["人材", "HR", "採用", "転職"],
-        ["金融", "FinTech", "決済", "保険"],
-        ["医療", "ヘルスケア", "介護"],
-    ],
-    "skill": [
-        ["CRM", "Salesforce", "HubSpot", "SFA"],
-        ["データ分析", "SQL", "BI", "Tableau", "Looker"],
-        ["法人営業", "BtoB営業", "アカウント営業", "提案営業"],
-        ["採用", "ダイレクトリクルーティング", "面接", "スカウト"],
-        ["Laravel", "PHP", "バックエンド"],
-        ["Python", "機械学習", "ML", "データサイエンス"],
-    ],
-    "remote": [
-        ["フルリモート", "リモート", "在宅勤務", "全国"],
-        ["ハイブリッド", "週3リモート", "一部リモート", "リモート可"],
-        ["出社中心", "出社", "オフィス勤務"],
-    ],
-}
+def load_semantic_groups():
+    terms_path = Path(__file__).with_name("matching_terms.json")
+
+    with terms_path.open(encoding="utf-8") as terms_file:
+        return json.load(terms_file)
+
+
+SEMANTIC_GROUPS = load_semantic_groups()
 
 
 def normalize(value):
