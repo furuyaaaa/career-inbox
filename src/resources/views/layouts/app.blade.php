@@ -415,7 +415,7 @@
   <body>
     <div class="shell">
       <aside class="sidebar">
-        <a class="brand" href="{{ auth()->check() ? route('jobs.index') : route('login') }}">
+        <a class="brand" href="{{ auth()->check() ? route('dashboard') : route('login') }}">
           <span class="mark">CI</span>
           <span>
             <strong>Career Inbox</strong>
@@ -424,6 +424,7 @@
         </a>
         <nav class="nav">
           @auth
+            <a href="{{ route('dashboard') }}" @class(['active' => request()->routeIs('dashboard')])>ダッシュボード</a>
             <a href="{{ route('jobs.index') }}" @class(['active' => request()->routeIs('jobs.*')])>受信求人</a>
             <a href="{{ route('preferences.edit') }}" @class(['active' => request()->routeIs('preferences.*')])>希望条件</a>
             <a href="{{ route('gmail.index') }}" @class(['active' => request()->routeIs('gmail.*')])>Gmail 連携・検索</a>
