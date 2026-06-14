@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\JobPost;
 use App\Models\PreferenceProfile;
-use App\Services\JobMatchScorer;
+use App\Services\MatchingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly JobMatchScorer $scorer)
+    public function __construct(private readonly MatchingService $matchingService)
     {
     }
 
@@ -27,7 +27,7 @@ class DashboardController extends Controller
 
         $scoredJobs = $jobPosts
             ->map(function (JobPost $jobPost) use ($profile): JobPost {
-                $jobPost->match = $this->scorer->score($jobPost, $profile);
+                $jobPost->match = $this->matchingService->score($jobPost, $profile);
 
                 return $jobPost;
             });

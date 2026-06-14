@@ -6,8 +6,11 @@ use App\Models\JobPost;
 use App\Models\PreferenceProfile;
 use Illuminate\Support\Str;
 
-class JobMatchScorer
+class JobMatchScorer implements MatchingService
 {
+    /**
+     * @return array{score: int, reasons: array<int, string>}
+     */
     public function score(JobPost $jobPost, PreferenceProfile $profile): array
     {
         $score = 20;
