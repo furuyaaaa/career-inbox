@@ -103,6 +103,18 @@ docker compose exec app php artisan db:seed --class=DemoUserSeeder --force
 
 Gmail 連携画面では、Google OAuth の接続導線、Gmail 検索クエリによる取り込み、取り込み履歴の確認ができます。取り込み時は件名、送信者、スニペット、本文から会社名、求人タイトル、職種、業界、勤務地、年収、働き方、スキル・経験、求人URLを抽出します。Google Cloud の認証情報がない状態でも、デモ取り込みで求人メール取り込み後の流れを確認できます。
 
+## マッチングドライバー
+
+通常はPHP版のマッチング処理を使います。Python版のプロトタイプを試す場合は、`src/.env` で以下を設定します。
+
+```env
+MATCHING_DRIVER=python
+MATCHING_PYTHON_BINARY=python3
+MATCHING_PYTHON_SCRIPT=/var/www/html/python/matching_service.py
+```
+
+PHP版に戻す場合は `MATCHING_DRIVER=php` にします。どちらのドライバーも、求人と希望条件から `score` と `reasons` を返します。
+
 ## Gmail 連携設定
 
 実際の Gmail から求人メールを取り込む場合は、Google Cloud で Gmail API を有効化し、OAuth クライアントを作成します。
@@ -197,6 +209,7 @@ Laravel のサービスクラスで、自分の希望条件と求人情報を比
 ### マッチング処理
 
 - Laravel サービスクラス
+- Python CLI プロトタイプ
 
 ### 開発・管理
 
