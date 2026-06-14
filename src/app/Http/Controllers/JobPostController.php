@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JobPost;
 use App\Models\PreferenceProfile;
-use App\Services\JobMatchScorer;
+use App\Services\MatchingService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class JobPostController extends Controller
 {
-    public function __construct(private readonly JobMatchScorer $scorer)
+    public function __construct(private readonly MatchingService $matchingService)
     {
     }
 
@@ -48,7 +48,7 @@ class JobPostController extends Controller
             ->latest()
             ->get()
             ->map(function (JobPost $jobPost) use ($profile): JobPost {
-                $jobPost->match = $this->scorer->score($jobPost, $profile);
+                $jobPost->match = $this->matchingService->score($jobPost, $profile);
 
                 return $jobPost;
             });
